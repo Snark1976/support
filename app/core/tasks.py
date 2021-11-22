@@ -1,13 +1,13 @@
 from celery import shared_task
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail, mail_admins
 
-from .models import Ticket, Message
+from core.models import Ticket, Message
 
 
 @shared_task
 def send_mail_created_ticket(user_id, ticket_id, title, text, time):
-    user = User.objects.get(id=user_id)
+    user = get_user_model().objects.get(id=user_id)
     send_mail(
         'Your ticket has been registered',
         f'Dear, {user.username}.\n'
@@ -32,7 +32,7 @@ def send_mail_created_ticket(user_id, ticket_id, title, text, time):
 
 @shared_task
 def send_mail_change_status_ticket(user_id, ticket_id, title, status):
-    user = User.objects.get(id=user_id)
+    user = get_user_model().objects.get(id=user_id)
     send_mail(
         'Your ticket status has been changed',
         f'Dear, {user.username}.\n'
@@ -46,11 +46,11 @@ def send_mail_change_status_ticket(user_id, ticket_id, title, status):
 
 @shared_task
 def send_mail_added_message(author_message_id, author_ticket_id, ticket_id, title, text, time):
-    user = User.objects.get(id=author_ticket_id)
+    user = get_user_model().objects.get(id=author_ticket_id)
     if author_message_id == author_ticket_id:
         author_message = user
     else:
-        author_message = User.objects.get(id=author_message_id)
+        author_message = get_user_model().objects.get(id=author_message_id)
     send_mail(
         'Message added to your ticket',
         f'Dear, {user.username}.\n'

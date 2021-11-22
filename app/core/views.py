@@ -1,23 +1,13 @@
-from .tasks import send_mail_created_ticket, send_mail_change_status_ticket, send_mail_added_message
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import TicketSerializer, MessageSerializer, TicketsViewSerializer
-from .models import Ticket
 
-
-class PermissionToOneTicketView(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method == 'PUT':
-            if request.user.is_staff:
-                return True
-            return False
-        else:
-            if obj.author == request.user or request.user.is_staff:
-                return True
-            return False
+from core.serializers import TicketSerializer, MessageSerializer, TicketsViewSerializer
+from core.models import Ticket
+from core.permissions import PermissionToOneTicketView
+from core.tasks import send_mail_created_ticket, send_mail_change_status_ticket, send_mail_added_message
 
 
 class TicketsView(APIView):
