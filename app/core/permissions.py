@@ -1,9 +1,9 @@
 from rest_framework.permissions import BasePermission
 
 
-class PermissionToOneTicketView(BasePermission):
+class PermissionTicketView(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method == 'PUT':
+        if request.method == 'PATCH':
             if request.user.is_staff:
                 return True
             return False

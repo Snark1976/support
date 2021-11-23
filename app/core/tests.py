@@ -14,33 +14,31 @@ class SupportTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
 
     def test_get_tickets_list(self):
-        response = self.client.get('/api/tickets/')
+        response = self.client.get('/api/ticket/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_tickets_list_anonymous(self):
         self.client.force_authenticate(user=None)
-        response = self.client.get('/api/tickets/')
+        response = self.client.get('/api/ticket/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_tickets(self):
-        response = self.client.post('/api/tickets/', format='json', data={
-            "new_ticket": {
-                "title_ticket": "New ticket",
-                "text": "Message"
+        response = self.client.post('/api/ticket/', format='json', data={
+            "ticket": {
+                "title_ticket": "New ticket"
             }
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_add_message(self):
-        self.client.post('/api/tickets/', format='json', data={
+        self.client.post('/api/ticket/', format='json', data={
             "new_ticket": {
-                "title_ticket": "New ticket",
-                "text": "Message"
+                "title_ticket": "New ticket"
             }
         })
-        response = self.client.post('/api/tickets/1/', format='json', data={
-            "new_message": {
-                "text": "clarification"
-            }
+        response = self.client.post('/api/ticket/1/message', format='json', data={
+            "text": "answer",
+            "ticket": "1",
+            "author": "1"
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
