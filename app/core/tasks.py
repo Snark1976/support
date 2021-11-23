@@ -6,40 +6,38 @@ from core.models import Ticket, Message
 
 
 @shared_task
-def send_mail_created_ticket(user_id, ticket_id, title, text, time):
-    user = get_user_model().objects.get(id=user_id)
+def send_mail_created_ticket(ticket):
+    user = get_user_model().objects.get(pk=ticket['author'])
     send_mail(
         'Your ticket has been registered',
         f'Dear, {user.username}.\n'
-        f'Your ticket is registered under the number {ticket_id}.\n'
-        f'Title: "{title}"\n'
-        f'Text: "{text}"\n'
-        f'Time registration: {time}',
+        f'Your ticket is registered under the number {ticket["id"]}.\n'
+        f'Ticket text: "{ticket["text"]}"\n'
+        f'Time registration: {ticket["created"]}',
         'support@example.com',
         [user.email],
         fail_silently=False,
     )
     mail_admins(
         'New ticket',
-        f'User: {user.username}, ID: {user_id}.\n, ticket ID: {ticket_id}.\n'
-        f'Title: "{title}"\n'
-        f'Text: "{text}"\n'
-        f'Time registration: {time}',
+        f'User: {user.username}, ID: {ticket["author"]}.\n, ticket ID: {ticket["id"]}.\n'
+        f'Ticket text: "{ticket["text"]}"\n'
+        f'Time registration: {ticket["created"]}',
         fail_silently=False,
     )
     return True
 
 
 @shared_task
-def send_mail_change_status_ticket(user_id, ticket_id, title, status):
-    user = get_user_model().objects.get(id=user_id)
+def send_mail_change_status_ticket(ticket_id):
+    ticket = Ticket.objects.get(pk=int(ticket_id))
     send_mail(
         'Your ticket status has been changed',
-        f'Dear, {user.username}.\n'
-        f'The status of your ticket "{title}" has been changed to "{status}".\n'
-        f'Ticket ID: {ticket_id}.\n',
+        f'Dear, {ticket.author}.\n'
+        f'The status of your ticket "{ticket.text}" has been changed to "{ticket.status}".\n'
+        f'Ticket ID: {ticket.pk}.\n',
         'support@example.com',
-        [user.email],
+        [ticket.author.email],
         fail_silently=False,
     )
 
@@ -79,8 +77,7 @@ def send_email_report():
     mail_admins(
         'Report support',
         f'Total tickets: {len(Ticket.objects.all())}\n'
-        f'Total messages: {len(Message.objects.all())}\n'
-        f'Opened tickets: ',
+        f'Total messages: {len(Message.objects.all())}',
         fail_silently=False,
     )
     return True
