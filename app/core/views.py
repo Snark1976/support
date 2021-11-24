@@ -1,5 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -10,19 +11,15 @@ from core.logic import get_user_tickets
 from core.models import Ticket, Message
 
 
-class TicketViewSet(viewsets.ViewSet):
+class TicketViewSet(ListModelMixin, RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated & PermissionTicketView]
+    serializer_class = TicketSerializer
 
-    def list(self, request):
-        queryset = get_user_tickets(request.user)
-        serializer = TicketSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        ticket = get_object_or_404(Ticket.objects.all(), pk=pk)
-        self.check_object_permissions(request, ticket)
-        serializer = TicketSerializer(ticket)
-        return Response(serializer.data)
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Ticket.objects.all()
+        else:
+            return Ticket.objects.filter(author_id=self.request.user.id)
 
     def create(self, request):
         ticket = request.data.get('ticket')
