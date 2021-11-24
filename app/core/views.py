@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from core.serializers import TicketSerializer, MessageSerializer
 from core.permissions import PermissionTicketView
 from core.tasks import send_mail_created_ticket, send_mail_change_status_ticket, send_mail_added_message
-from core.logic import get_user_tickets
 from core.models import Ticket, Message
 
 
